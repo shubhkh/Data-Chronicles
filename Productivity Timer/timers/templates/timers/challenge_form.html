@@ -1,0 +1,47 @@
+{% extends 'timers/base.html' %}
+
+{% block title %}{% if editing %}Edit{% else %}New{% endif %} Challenge &mdash; Productivity Timer{% endblock %}
+
+{% block content %}
+<section class="auth-wrap">
+    <div class="auth-card auth-card--wide">
+        <p class="hero-script">{% if editing %}adjust{% else %}accept{% endif %}</p>
+        <h1 class="auth-title">{% if editing %}Edit challenge{% else %}New challenge{% endif %}</h1>
+        <p class="auth-sub">Set the rules. Show up daily. We keep score.</p>
+
+        <form method="post" class="auth-form">
+            {% csrf_token %}
+            {% for field in form %}
+                <div class="auth-field">
+                    <label for="{{ field.id_for_label }}">{{ field.label }}</label>
+                    {{ field }}
+                    {% for error in field.errors %}<p class="field-error">{{ error }}</p>{% endfor %}
+                </div>
+            {% endfor %}
+            <p class="pc-duration">Duration: <strong id="pc-dur">—</strong></p>
+            <button type="submit" class="btn btn-primary btn-block">
+                {% if editing %}Save changes{% else %}Challenge accepted{% endif %}
+            </button>
+        </form>
+        <p class="auth-alt"><a href="{% url 'timers:challenges' %}">&larr; Back to challenges</a></p>
+    </div>
+</section>
+{% endblock %}
+
+{% block scripts %}
+<script>
+(function () {
+    var s = document.getElementById('pc-start');
+    var e = document.getElementById('pc-end');
+    var out = document.getElementById('pc-dur');
+    function upd() {
+        if (!s.value || !e.value) { out.textContent = '—'; return; }
+        var d = (new Date(e.value) - new Date(s.value)) / 86400000 + 1;
+        out.textContent = d > 0 ? d + ' day' + (d === 1 ? '' : 's') : 'invalid range';
+    }
+    s.addEventListener('input', upd);
+    e.addEventListener('input', upd);
+    upd();
+})();
+</script>
+{% endblock %}

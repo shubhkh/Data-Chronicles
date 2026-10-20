@@ -1,0 +1,32 @@
+{% extends 'timers/base.html' %}
+{% load static %}
+
+{% block title %}Stopwatch &mdash; Productivity Timer{% endblock %}
+{% block nav_stopwatch %}active{% endblock %}
+{% block accent %}cyan{% endblock %}
+
+{% block content %}
+<section class="timer-stage">
+    <div class="display display--hero">
+        <span id="sw-minutes">00</span><span class="display-sep">:</span><span id="sw-seconds">00</span><span class="display-centi" id="sw-centiseconds">00</span>
+    </div>
+
+    <div class="controls">
+        <button class="btn btn-primary btn-lg" id="sw-start-btn">Start</button>
+        <button class="btn btn-ghost" id="sw-lap-btn" disabled>Lap</button>
+        <button class="btn btn-ghost" id="sw-reset-btn" disabled>Reset</button>
+    </div>
+
+    <div class="laps" id="sw-laps" hidden>
+        <div class="laps-header">
+            <span>Lap</span><span>Split</span><span>Total</span>
+        </div>
+        <ol class="laps-list" id="sw-laps-list"></ol>
+    </div>
+</section>
+{% endblock %}
+
+{% block scripts %}
+<script src="{% static 'timers/js/track.js' %}"></script>
+<script src="{% static 'timers/js/stopwatch.js' %}"></script>
+{% endblock %}

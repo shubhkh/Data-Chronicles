@@ -1,0 +1,28 @@
+{% extends 'timers/base.html' %}
+
+{% block title %}Create account &mdash; Productivity Timer{% endblock %}
+
+{% block content %}
+<section class="auth-wrap">
+    <div class="auth-card">
+        <p class="hero-script">join us</p>
+        <h1 class="auth-title">Create account</h1>
+        <p class="auth-sub">Your report, your streaks &mdash; saved to your profile.</p>
+
+        <form method="post" class="auth-form">
+            {% csrf_token %}
+            {% for field in form %}
+                <div class="auth-field">
+                    <label for="{{ field.id_for_label }}">{{ field.label }}</label>
+                    {{ field }}
+                    {% if field.help_text %}<p class="helptext">{{ field.help_text }}</p>{% endif %}
+                    {% for error in field.errors %}<p class="field-error">{{ error }}</p>{% endfor %}
+                </div>
+            {% endfor %}
+            <button type="submit" class="btn btn-primary btn-block">Create account</button>
+        </form>
+
+        <p class="auth-alt">Already have one? <a href="{% url 'timers:login' %}">Sign in</a></p>
+    </div>
+</section>
+{% endblock %}

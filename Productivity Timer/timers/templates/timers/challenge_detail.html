@@ -1,0 +1,103 @@
+{% extends 'timers/base.html' %}
+
+{% block title %}{{ pc.name }} &mdash; Productivity Timer{% endblock %}
+
+{% block content %}
+<section class="pc-detail">
+    <div class="pc-card-main">
+        <div class="pc-top">
+            <h1 class="auth-title">{{ pc.name }}</h1>
+            <span class="pc-badge pc-{{ status }}">{{ status }}</span>
+        </div>
+        {% if pc.description %}<p class="pc-desc">{{ pc.description }}</p>{% endif %}
+        <div class="pc-facts">
+            <span><strong>Goal</strong> {{ pc.goal|default:"—" }}</span>
+            <span><strong>Daily target</strong> {{ pc.daily_target|default:"—" }}</span>
+            <span><strong>Runs</strong> {{ pc.start_date|date:"d M" }} &rarr; {{ pc.end_date|date:"d M Y" }} &middot; {{ pc.duration_days }} days</span>
+        </div>
+        <div class="pc-actions">
+            {% if can_log_today %}
+            <a class="btn btn-primary" href="{% url 'timers:challenge_entry' pc.pk today_iso %}">Log today</a>
+            {% endif %}
+            <a class="btn btn-ghost" href="{% url 'timers:challenge_edit' pc.pk %}">Edit</a>
+            <form method="post" action="{% url 'timers:challenge_delete' pc.pk %}" class="nav-form"
+                  onsubmit="return confirm('Delete this challenge and its journal?');">
+                {% csrf_token %}
+                <button type="submit" class="btn btn-ghost btn-danger">Delete</button>
+            </form>
+        </div>
+    </div>
+
+    {% if stats.finished %}
+    <div class="pc-card-main pc-summary">
+        <h2 class="challenge-section-title">Final summary</h2>
+        <div class="stat-grid">
+            <div class="stat-card"><span class="stat-value">{{ pc.duration_days }}</span><span class="stat-label">Days</span></div>
+            <div class="stat-card"><span class="stat-value">{{ stats.completed }}</span><span class="stat-label">Completed</span></div>
+            <div class="stat-card"><span class="stat-value">{{ stats.missed }}</span><span class="stat-label">Missed</span></div>
+            <div class="stat-card"><span class="stat-value">{{ stats.consistency }}%</span><span class="stat-label">Consistency</span></div>
+        </div>
+        {% if improvements %}
+        <h3 class="pc-improve-head">Improvements you noticed</h3>
+        <ul class="pc-improve-list">
+            {% for imp in improvements %}<li>{{ imp }}</li>{% endfor %}
+        </ul>
+        {% endif %}
+    </div>
+    {% else %}
+    <div class="stat-grid pc-stat-row">
+        <div class="stat-card"><span class="stat-value">{{ stats.completed }}</span><span class="stat-label">Completed</span></div>
+        <div class="stat-card"><span class="stat-value">{{ stats.partial }}</span><span class="stat-label">Partial</span></div>
+        <div class="stat-card"><span class="stat-value">{{ stats.missed }}</span><span class="stat-label">Missed</span></div>
+        <div class="stat-card"><span class="stat-value">{{ stats.consistency }}%</span><span class="stat-label">Consistency</span></div>
+        <div class="stat-card"><span class="stat-value">{{ stats.streak }}&#128293;</span><span class="stat-label">Streak</span></div>
+    </div>
+    {% endif %}
+
+    <div class="cal-wrap">
+        {% for month in months %}
+        <div class="cal-month">
+            <h3>{{ month.label }}</h3>
+            <div class="cal-grid">
+                <span class="cal-wd">M</span><span class="cal-wd">T</span><span class="cal-wd">W</span><span class="cal-wd">T</span><span class="cal-wd">F</span><span class="cal-wd">S</span><span class="cal-wd">S</span>
+                {% for week in month.weeks %}
+                    {% for day in week %}
+                        {% if day %}
+                            {% if day.loggable %}
+                            <a class="cal-day cal-{{ day.status }}{% if day.today %} cal-today{% endif %}"
+                               href="{% url 'timers:challenge_entry' pc.pk day.iso %}" title="{{ day.iso }}">{{ day.day }}</a>
+                            {% else %}
+                            <span class="cal-day cal-{{ day.status }}{% if day.today %} cal-today{% endif %}">{{ day.day }}</span>
+                            {% endif %}
+                        {% else %}
+                            <span class="cal-day cal-blank"></span>
+                        {% endif %}
+                    {% endfor %}
+                {% endfor %}
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+
+    {% if recent_entries %}
+    <div class="pc-card-main">
+        <h2 class="challenge-section-title">Journal</h2>
+        {% for e in recent_entries %}
+        <div class="entry-row">
+            <div class="entry-head">
+                <a class="entry-date" href="{% url 'timers:challenge_entry' pc.pk e.date.isoformat %}">
+                    {{ e.date|date:"D d M" }}
+                </a>
+                <span class="entry-badge st-{{ e.status }}">{{ e.get_status_display }}</span>
+            </div>
+            {% if e.did %}<p class="entry-note"><strong>Did:</strong> {{ e.did }}</p>{% endif %}
+            {% if e.learned %}<p class="entry-note"><strong>Learned:</strong> {{ e.learned }}</p>{% endif %}
+            {% if e.difficulties %}<p class="entry-note"><strong>Struggles:</strong> {{ e.difficulties }}</p>{% endif %}
+            {% if e.improvements %}<p class="entry-note"><strong>Improved:</strong> {{ e.improvements }}</p>{% endif %}
+            {% if e.plan_next %}<p class="entry-note"><strong>Next:</strong> {{ e.plan_next }}</p>{% endif %}
+        </div>
+        {% endfor %}
+    </div>
+    {% endif %}
+</section>
+{% endblock %}

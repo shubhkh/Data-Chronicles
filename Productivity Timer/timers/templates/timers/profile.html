@@ -1,0 +1,54 @@
+{% extends 'timers/base.html' %}
+
+{% block title %}Profile &mdash; Productivity Timer{% endblock %}
+{% block nav_profile %}active{% endblock %}
+
+{% block content %}
+<section class="profile-wrap">
+    <div class="profile-card">
+        <div class="avatar">{{ user.username|first|upper }}</div>
+        <h1 class="profile-name">{{ user.get_full_name|default:user.username }}</h1>
+        <p class="profile-meta">
+            @{{ user.username }}
+            {% if user.email %}&middot; {{ user.email }}{% endif %}<br>
+            member since {{ user.date_joined|date:"M Y" }}
+        </p>
+
+        <div class="stat-grid profile-stats">
+            <div class="stat-card">
+                <span class="stat-value">{{ ustats.sessions }}</span>
+                <span class="stat-label">Sessions</span>
+            </div>
+            <div class="stat-card">
+                <span class="stat-value">{{ ustats.total }}</span>
+                <span class="stat-label">Time tracked</span>
+            </div>
+            <div class="stat-card">
+                <span class="stat-value">{{ ustats.fav }}</span>
+                <span class="stat-label">Favourite tool</span>
+            </div>
+        </div>
+
+        {% if messages %}
+            {% for message in messages %}<p class="flash">{{ message }}</p>{% endfor %}
+        {% endif %}
+
+        <form method="post" class="auth-form profile-form">
+            {% csrf_token %}
+            {% for field in form %}
+                <div class="auth-field">
+                    <label for="{{ field.id_for_label }}">{{ field.label }}</label>
+                    {{ field }}
+                    {% for error in field.errors %}<p class="field-error">{{ error }}</p>{% endfor %}
+                </div>
+            {% endfor %}
+            <button type="submit" class="btn btn-primary btn-block">Save changes</button>
+        </form>
+
+        <form method="post" action="{% url 'timers:logout' %}" class="logout-form">
+            {% csrf_token %}
+            <button type="submit" class="btn btn-ghost btn-block">Sign out</button>
+        </form>
+    </div>
+</section>
+{% endblock %}

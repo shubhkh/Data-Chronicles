@@ -1,0 +1,108 @@
+{% extends 'timers/base.html' %}
+
+{% block title %}Challenges &mdash; Productivity Timer{% endblock %}
+{% block nav_challenges %}active{% endblock %}
+{% block accent %}rose{% endblock %}
+
+{% block content %}
+<section class="report-head">
+    <p class="hero-script">level up</p>
+    <h1 class="report-title">Challenges</h1>
+    <p class="report-sub">Accept a challenge &mdash; we track your progress automatically.</p>
+</section>
+
+<div class="pc-head">
+    <h2 class="challenge-section-title">My challenges</h2>
+    {% if user.is_authenticated %}
+    <a class="btn btn-primary" href="{% url 'timers:challenge_new' %}">+ New challenge</a>
+    {% endif %}
+</div>
+
+{% if user.is_authenticated %}
+    {% if personal %}
+    <div class="challenge-grid pc-grid">
+        {% for item in personal %}
+        <a class="challenge-card pc-card" href="{% url 'timers:challenge_detail' item.pc.pk %}">
+            <div class="pc-top">
+                <h3>{{ item.pc.name }}</h3>
+                <span class="pc-badge pc-{{ item.status }}">{{ item.status }}</span>
+            </div>
+            <p>{{ item.pc.goal|default:item.pc.daily_target|truncatechars:80 }}</p>
+            <span class="pc-dates">
+                {{ item.pc.start_date|date:"d M" }} &rarr; {{ item.pc.end_date|date:"d M Y" }}
+                &middot; {{ item.total }} days
+            </span>
+            <div class="todo-bar challenge-bar">
+                <div class="todo-bar-fill" data-pct="{{ item.pct }}"></div>
+            </div>
+            <span class="challenge-progress">{{ item.done }} / {{ item.total }} days done</span>
+        </a>
+        {% endfor %}
+    </div>
+    {% else %}
+    <div class="empty-report pc-empty">
+        <h2>No challenges yet</h2>
+        <p>Create your own challenge with daily targets and a journal.</p>
+        <a href="{% url 'timers:challenge_new' %}" class="btn btn-primary">+ Create one</a>
+    </div>
+    {% endif %}
+{% else %}
+<div class="empty-report pc-empty">
+    <h2>Make it yours</h2>
+    <p>Sign in to create your own challenges and keep a daily journal.</p>
+    <a href="{% url 'timers:login' %}" class="btn btn-primary">Sign in</a>
+</div>
+{% endif %}
+
+<div class="divider"><span>&#10022;&ensp;&#10022;&ensp;&#10022;</span></div>
+<p class="hero-script quick-title">or pick a</p>
+<h2 class="challenge-section-title quick-sub">Quick challenge</h2>
+
+{% if active %}
+<h2 class="challenge-section-title">In progress</h2>
+<div class="challenge-grid">
+    {% for item in active %}
+    <div class="challenge-card is-active">
+        <div class="challenge-icon">{{ item.ch.icon }}</div>
+        <h3>{{ item.ch.title }}</h3>
+        <p>{{ item.ch.description }}</p>
+        <div class="todo-bar challenge-bar">
+            <div class="todo-bar-fill" data-pct="{{ item.pct }}"></div>
+        </div>
+        <span class="challenge-progress">{{ item.current }} / {{ item.target }}</span>
+    </div>
+    {% endfor %}
+</div>
+{% endif %}
+
+{% if available %}
+<h2 class="challenge-section-title">Available</h2>
+<div class="challenge-grid">
+    {% for ch in available %}
+    <div class="challenge-card">
+        <div class="challenge-icon">{{ ch.icon }}</div>
+        <h3>{{ ch.title }}</h3>
+        <p>{{ ch.description }}</p>
+        <form method="post" action="{% url 'timers:challenge_accept' ch.pk %}">
+            {% csrf_token %}
+            <button type="submit" class="btn btn-primary">Accept</button>
+        </form>
+    </div>
+    {% endfor %}
+</div>
+{% endif %}
+
+{% if done %}
+<h2 class="challenge-section-title">Completed</h2>
+<div class="challenge-grid">
+    {% for item in done %}
+    <div class="challenge-card is-done">
+        <div class="challenge-icon">&#10003;</div>
+        <h3>{{ item.ch.title }}</h3>
+        <p>{{ item.ch.description }}</p>
+        <span class="challenge-badge">Completed &middot; {{ item.when }}</span>
+    </div>
+    {% endfor %}
+</div>
+{% endif %}
+{% endblock %}

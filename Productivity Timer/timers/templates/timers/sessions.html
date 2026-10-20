@@ -1,0 +1,67 @@
+{% extends 'timers/base.html' %}
+
+{% block title %}Sessions &mdash; Productivity Timer{% endblock %}
+{% block nav_report %}active{% endblock %}
+{% block accent %}teal{% endblock %}
+
+{% block content %}
+<section class="report-head">
+    <p class="hero-script">all</p>
+    <h1 class="report-title">Sessions</h1>
+    <p class="report-sub">Every completed timer session, newest first.</p>
+</section>
+
+<div class="filter-bar">
+    <div class="filter-group">
+        <span class="filter-label">Activity</span>
+        <a class="chip {% if kind == 'all' %}active{% endif %}" href="?kind=all&sort={{ sort }}&dir={{ dir }}">All</a>
+        {% for k, meta in kinds.items %}
+        <a class="chip {% if kind == k %}active{% endif %}" href="?kind={{ k }}&sort={{ sort }}&dir={{ dir }}">{{ meta.0 }}</a>
+        {% endfor %}
+    </div>
+</div>
+
+{% if rows %}
+<div class="chart-card chart-card--wide table-card">
+    <table class="session-table session-table--full">
+        <thead>
+            <tr>
+                <th><a href="?kind={{ kind }}&sort=date&dir={% if sort == 'date' and dir == 'desc' %}asc{% else %}desc{% endif %}">When {% if sort == 'date' %}{% if dir == 'desc' %}&#8595;{% else %}&#8593;{% endif %}{% endif %}</a></th>
+                <th>Activity</th>
+                <th>Task</th>
+                <th><a href="?kind={{ kind }}&sort=duration&dir={% if sort == 'duration' and dir == 'desc' %}asc{% else %}desc{% endif %}">Length {% if sort == 'duration' %}{% if dir == 'desc' %}&#8595;{% else %}&#8593;{% endif %}{% endif %}</a></th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for row in rows %}
+            <tr>
+                <td>{{ row.when }}</td>
+                <td>{{ row.kind }}</td>
+                <td>{{ row.task }}</td>
+                <td>{{ row.dur }}</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+
+    {% if page_obj.paginator.num_pages > 1 %}
+    <div class="pagination">
+        {% if page_obj.has_previous %}
+        <a class="chip" href="?kind={{ kind }}&sort={{ sort }}&dir={{ dir }}&page={{ page_obj.previous_page_number }}">&larr; Prev</a>
+        {% endif %}
+        <span class="page-info">Page {{ page_obj.number }} of {{ page_obj.paginator.num_pages }}</span>
+        {% if page_obj.has_next %}
+        <a class="chip" href="?kind={{ kind }}&sort={{ sort }}&dir={{ dir }}&page={{ page_obj.next_page_number }}">Next &rarr;</a>
+        {% endif %}
+    </div>
+    {% endif %}
+</div>
+{% else %}
+<div class="empty-report">
+    <div class="empty-icon">&#10047;</div>
+    <h2>No sessions yet</h2>
+    <p>Complete a timer session and it will show up here.</p>
+    <a href="{% url 'timers:pomodoro' %}" class="btn btn-primary">Start a session</a>
+</div>
+{% endif %}
+{% endblock %}

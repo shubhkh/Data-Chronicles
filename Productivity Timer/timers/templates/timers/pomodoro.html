@@ -1,0 +1,73 @@
+{% extends 'timers/base.html' %}
+{% load static %}
+
+{% block title %}Pomodoro &mdash; Productivity Timer{% endblock %}
+{% block nav_pomodoro %}active{% endblock %}
+{% block accent %}rose{% endblock %}
+
+{% block content %}
+<section class="timer-stage">
+    <div class="mode-tabs" role="tablist">
+        <button class="mode-tab active" id="pm-tab-focus" data-mode="focus">Focus</button>
+        <button class="mode-tab" id="pm-tab-short" data-mode="short">Short Break</button>
+        <button class="mode-tab" id="pm-tab-long" data-mode="long">Long Break</button>
+    </div>
+
+    <div class="session-dots" id="pm-dots" title="Focus sessions completed"></div>
+
+    <div class="ring-wrap">
+        <svg class="ring" viewBox="0 0 260 260">
+            <circle class="ring-track" cx="130" cy="130" r="118"></circle>
+            <circle class="ring-progress" id="pm-ring" cx="130" cy="130" r="118"></circle>
+        </svg>
+        <div class="ring-center">
+            <div class="display display--ring display--pomo">
+                <span id="pm-minutes">25</span><span class="display-sep">:</span><span id="pm-seconds">00</span>
+            </div>
+            <div class="ring-status" id="pm-status">#1 &middot; Time to focus!</div>
+        </div>
+    </div>
+
+    <div class="presets">
+        <button class="chip" data-add="1">+1</button>
+        <button class="chip" data-add="5">+5</button>
+        <button class="chip" data-add="10">+10</button>
+    </div>
+
+    <input type="text" class="task-input" id="pm-task" maxlength="80" list="pm-task-list"
+           placeholder="What are you working on?" autocomplete="off">
+    <datalist id="pm-task-list">
+        {% for task in open_tasks %}<option value="{{ task.title }}">{% endfor %}
+    </datalist>
+
+    <div class="pomo-settings">
+        <label class="pomo-field">
+            <span>Focus</span>
+            <input type="number" id="pm-set-focus" min="1" max="120" value="25">
+        </label>
+        <label class="pomo-field">
+            <span>Short break</span>
+            <input type="number" id="pm-set-short" min="1" max="60" value="5">
+        </label>
+        <label class="pomo-field">
+            <span>Long break</span>
+            <input type="number" id="pm-set-long" min="1" max="60" value="15">
+        </label>
+        <label class="pomo-field">
+            <span>Sessions</span>
+            <input type="number" id="pm-set-rounds" min="1" max="12" value="4">
+        </label>
+    </div>
+
+    <div class="controls">
+        <button class="btn btn-primary btn-lg" id="pm-start-btn">Start</button>
+        <button class="btn btn-ghost" id="pm-skip-btn">Skip</button>
+        <button class="btn btn-ghost" id="pm-reset-btn">Reset</button>
+    </div>
+</section>
+{% endblock %}
+
+{% block scripts %}
+<script src="{% static 'timers/js/track.js' %}"></script>
+<script src="{% static 'timers/js/pomodoro.js' %}"></script>
+{% endblock %}

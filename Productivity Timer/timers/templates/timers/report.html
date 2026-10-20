@@ -1,0 +1,194 @@
+{% extends 'timers/base.html' %}
+{% load static %}
+
+{% block title %}Report &mdash; Productivity Timer{% endblock %}
+{% block nav_report %}active{% endblock %}
+{% block accent %}teal{% endblock %}
+
+{% block content %}
+<section class="report-head">
+    <p class="hero-script">your</p>
+    <h1 class="report-title">Focus Report</h1>
+    <p class="report-sub">How much time you actually studied or worked, at a glance.</p>
+</section>
+
+{% if has_any %}
+<div class="filter-bar">
+    <div class="filter-group">
+        <span class="filter-label">Range</span>
+        <a class="chip {% if range == '7' %}active{% endif %}" href="?range=7&kind={{ kind }}">7 days</a>
+        <a class="chip {% if range == '30' %}active{% endif %}" href="?range=30&kind={{ kind }}">30 days</a>
+        <a class="chip {% if range == '90' %}active{% endif %}" href="?range=90&kind={{ kind }}">90 days</a>
+        <a class="chip {% if range == 'all' %}active{% endif %}" href="?range=all&kind={{ kind }}">All time</a>
+    </div>
+    <div class="filter-group">
+        <span class="filter-label">Activity</span>
+        <a class="chip {% if kind == 'all' %}active{% endif %}" href="?range={{ range }}&kind=all">All</a>
+        <a class="chip {% if kind == 'stopwatch' %}active{% endif %}" href="?range={{ range }}&kind=stopwatch">Stopwatch</a>
+        <a class="chip {% if kind == 'countdown' %}active{% endif %}" href="?range={{ range }}&kind=countdown">Countdown</a>
+        <a class="chip {% if kind == 'pomodoro_focus' %}active{% endif %}" href="?range={{ range }}&kind=pomodoro_focus">Focus</a>
+        <a class="chip {% if kind == 'short_break' %}active{% endif %}" href="?range={{ range }}&kind=short_break">Short break</a>
+        <a class="chip {% if kind == 'long_break' %}active{% endif %}" href="?range={{ range }}&kind=long_break">Long break</a>
+    </div>
+</div>
+{% endif %}
+
+{% if has_data %}
+<div class="stat-grid">
+    <div class="stat-card">
+        <span class="stat-icon">&#9728;</span>
+        <span class="stat-value">{{ stats.today }}</span>
+        <span class="stat-label">Today</span>
+        <span class="stat-sub">{{ kind_label }} today</span>
+    </div>
+    <div class="stat-card">
+        <span class="stat-icon">&#128197;</span>
+        <span class="stat-value">{{ stats.week }}</span>
+        <span class="stat-label">Last 7 days</span>
+        <span class="stat-sub">{{ kind_label }} total</span>
+    </div>
+    <div class="stat-card">
+        <span class="stat-icon">&#9201;</span>
+        <span class="stat-value">{{ stats.total }}</span>
+        <span class="stat-label">Total time</span>
+        <span class="stat-sub">in selected period</span>
+    </div>
+    <div class="stat-card">
+        <span class="stat-icon">&#9654;</span>
+        <span class="stat-value">{{ stats.count }}</span>
+        <span class="stat-label">Sessions</span>
+        <span class="stat-sub">completed</span>
+    </div>
+    <div class="stat-card">
+        <span class="stat-icon">&#8776;</span>
+        <span class="stat-value">{{ stats.avg }}</span>
+        <span class="stat-label">Avg / day</span>
+        <span class="stat-sub">per calendar day</span>
+    </div>
+    <div class="stat-card">
+        <span class="stat-icon">&#127919;</span>
+        {% if stats.goal %}
+        <span class="stat-value">{{ stats.goal.pct }}%</span>
+        <span class="stat-label">Daily goal</span>
+        <span class="stat-sub">{{ stats.goal.done }} of {{ stats.goal.target }} today</span>
+        {% else %}
+        <span class="stat-value">—</span>
+        <span class="stat-label">Daily goal</span>
+        <span class="stat-sub">{% if user.is_authenticated %}set one in <a href="{% url 'timers:profile' %}">profile</a>{% else %}sign in to set{% endif %}</span>
+        {% endif %}
+    </div>
+</div>
+
+<div class="chart-grid">
+    <div class="chart-card chart-card--wide">
+        <h3>Minutes studied each day{% if stats.goal %} &middot; dashed line = {{ stats.goal.target }} goal{% endif %}</h3>
+        <div class="chart-box chart-box--tall"><canvas id="chart-bar"></canvas></div>
+    </div>
+    <div class="chart-card">
+        <h3>{{ donut_title }}</h3>
+        <div class="donut-wrap">
+            <div class="chart-box chart-box--donut"><canvas id="chart-donut"></canvas></div>
+            <ul class="donut-legend" id="donut-legend"></ul>
+        </div>
+    </div>
+    {% if show_focus_break %}
+    <div class="chart-card">
+        <h3>Focus vs break time</h3>
+        <p class="chart-sub">Total for selected period</p>
+        <div class="chart-box"><canvas id="chart-focusbreak"></canvas></div>
+    </div>
+    {% endif %}
+    <div class="chart-card">
+        <h3>Sessions per day</h3>
+        <p class="chart-sub">Completed timer sessions</p>
+        <div class="chart-box"><canvas id="chart-sessions"></canvas></div>
+    </div>
+    <div class="chart-card{% if show_focus_break %} chart-card--wide{% endif %}">
+        <h3>Cumulative {{ kind_label }}</h3>
+        <p class="chart-sub">Running total across the period</p>
+        <div class="chart-box"><canvas id="chart-area"></canvas></div>
+    </div>
+</div>
+
+{% if insights %}
+<h2 class="challenge-section-title">Insights</h2>
+<div class="insight-grid">
+    {% for i in insights %}
+    <div class="insight-chip">
+        <span class="insight-icon">{{ i.icon }}</span>
+        <span class="insight-label">{{ i.title }}</span>
+        <span class="insight-value">{{ i.value }}</span>
+        <span class="insight-sub">{{ i.sub }}</span>
+    </div>
+    {% endfor %}
+</div>
+{% endif %}
+
+<div class="chart-card chart-card--wide table-card">
+    <div class="table-head">
+        <h3>Recent sessions</h3>
+        <a href="{% url 'timers:sessions' %}" class="table-link">View all sessions &rarr;</a>
+    </div>
+    <table class="session-table">
+        <thead>
+            <tr><th>When</th><th>Activity</th><th>Task</th><th>Length</th></tr>
+        </thead>
+        <tbody>
+            {% for row in recent %}
+            <tr>
+                <td>{{ row.when }}</td>
+                <td>{{ row.kind }}</td>
+                <td>{{ row.task }}</td>
+                <td>{{ row.dur }}</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+
+{{ report_data|json_script:'report-data' }}
+{% endif %}
+
+{% if done_tasks %}
+<div class="chart-card chart-card--wide todo-history">
+    <div class="table-head">
+        <h3>Completed to-dos</h3>
+        <a href="{% url 'timers:tasks' %}" class="table-link">Open to-do list &rarr;</a>
+    </div>
+    <ul class="done-list">
+        {% for t in done_tasks %}
+        <li>
+            <span class="done-check">&#10003;</span>
+            <span class="done-title">{{ t.title }}</span>
+            <span class="done-date">{{ t.when }}</span>
+        </li>
+        {% endfor %}
+    </ul>
+</div>
+{% endif %}
+
+{% if has_any and not has_data %}
+<div class="empty-report">
+    <div class="empty-icon">&#10047;</div>
+    <h2>Nothing in this filter</h2>
+    <p>Try a wider range or a different activity.</p>
+</div>
+{% endif %}
+
+{% if not has_any %}
+<div class="empty-report">
+    <div class="empty-icon">&#10047;</div>
+    <h2>No sessions yet</h2>
+    <p>Run any timer &mdash; completed sessions will appear here as charts.</p>
+    <a href="{% url 'timers:pomodoro' %}" class="btn btn-primary">Start a session</a>
+</div>
+{% endif %}
+{% endblock %}
+
+{% block scripts %}
+{% if has_data %}
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2.2.0/dist/chartjs-plugin-datalabels.min.js"></script>
+<script src="{% static 'timers/js/report.js' %}"></script>
+{% endif %}
+{% endblock %}

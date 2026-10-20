@@ -1,0 +1,53 @@
+{% extends 'timers/base.html' %}
+
+{% block title %}To-Do &mdash; Productivity Timer{% endblock %}
+{% block nav_tasks %}active{% endblock %}
+{% block accent %}blue{% endblock %}
+
+{% block content %}
+<section class="todo-wrap">
+    <div class="todo-card">
+        <p class="hero-script">your</p>
+        <h1 class="auth-title">To-Do List</h1>
+        <p class="auth-sub">Plan it, time it, tick it off.</p>
+
+        <form method="post" action="{% url 'timers:task_add' %}" class="todo-add">
+            {% csrf_token %}
+            <input type="text" name="title" maxlength="120" required
+                   placeholder="What needs doing?" autocomplete="off">
+            <button type="submit" class="btn btn-primary">Add</button>
+        </form>
+
+        {% if total_count %}
+            <div class="todo-progress">
+                <span>{{ done_count }} of {{ total_count }} done</span>
+                <div class="todo-bar">
+                    <div class="todo-bar-fill" data-pct="{{ progress }}"></div>
+                </div>
+            </div>
+
+            <ul class="todo-list">
+                {% for task in tasks %}
+                <li class="todo-item {% if task.is_done %}done{% endif %}">
+                    <form method="post" action="{% url 'timers:task_toggle' task.pk %}">
+                        {% csrf_token %}
+                        <button type="submit" class="todo-check" aria-label="Toggle done">
+                            {% if task.is_done %}&#10003;{% endif %}
+                        </button>
+                    </form>
+                    <span class="todo-title">{{ task.title }}</span>
+                    <form method="post" action="{% url 'timers:task_delete' task.pk %}">
+                        {% csrf_token %}
+                        <button type="submit" class="todo-delete" aria-label="Delete task">&times;</button>
+                    </form>
+                </li>
+                {% endfor %}
+            </ul>
+        {% else %}
+            <div class="todo-empty">
+                <p>No tasks yet &mdash; add your first one above.</p>
+            </div>
+        {% endif %}
+    </div>
+</section>
+{% endblock %}

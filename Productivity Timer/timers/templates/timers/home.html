@@ -1,0 +1,142 @@
+{% extends 'timers/base.html' %}
+
+{% block title %}Productivity Timer{% endblock %}
+{% block nav_home %}active{% endblock %}
+
+{% block content %}
+<section class="hero hero--split">
+    <div class="hero-text">
+        <p class="hero-eyebrow">Your space for better productivity</p>
+        <h1 class="hero-title">Make Time for<br>What Matters.</h1>
+        <p class="hero-subtitle">
+            Focus on your goals, organize your day, build better habits, and track
+            your progress &mdash; all in one place.
+        </p>
+        <div class="hero-actions">
+            <a href="{% url 'timers:pomodoro' %}" class="btn btn-primary btn-lg">Start Focusing</a>
+            <a href="#tools" class="btn btn-ghost btn-lg">Explore Your Tools</a>
+        </div>
+    </div>
+    <div class="hero-visual" aria-hidden="true">
+        <div class="hv-ring-wrap">
+            <svg class="hv-ring" viewBox="0 0 200 200">
+                <circle cx="100" cy="100" r="84" fill="none"
+                        stroke="var(--border)" stroke-width="10"/>
+                <circle cx="100" cy="100" r="84" fill="none"
+                        stroke="var(--sage)" stroke-width="10" stroke-linecap="round"
+                        stroke-dasharray="528" stroke-dashoffset="170"
+                        transform="rotate(-90 100 100)"/>
+            </svg>
+            <div class="hv-center">
+                <span class="hv-time">25:00</span>
+                <span class="hv-label">focus</span>
+            </div>
+        </div>
+        <div class="hv-dots"><span class="done"></span><span class="done"></span><span></span><span></span></div>
+    </div>
+</section>
+
+{% if today_stats %}
+<section class="home-stats">
+    <a href="{% url 'timers:report' %}" class="hs-item">
+        <span class="hs-value">{{ today_stats.focus }}</span>
+        <span class="hs-label">Focused today</span>
+    </a>
+    <a href="{% url 'timers:tasks' %}" class="hs-item">
+        <span class="hs-value">{{ today_stats.tasks_done }}</span>
+        <span class="hs-label">To-dos done</span>
+    </a>
+    <a href="{% url 'timers:challenges' %}" class="hs-item">
+        <span class="hs-value">{{ today_stats.challenges }}</span>
+        <span class="hs-label">Active challenges</span>
+    </a>
+    <a href="{% url 'timers:report' %}" class="hs-item hs-item--goal">
+        <span class="hs-value">{{ today_stats.goal_pct }}%</span>
+        <span class="hs-label">Daily goal &middot; {{ today_stats.goal_done }} / {{ today_stats.goal_target }}m</span>
+        <div class="todo-bar hs-bar"><div class="todo-bar-fill" data-pct="{{ today_stats.goal_pct }}"></div></div>
+    </a>
+</section>
+{% endif %}
+
+<section class="section" id="tools">
+    <p class="section-eyebrow">choose your way to focus</p>
+    <h2 class="section-title">Find the right tool for your work, study, and daily routine.</h2>
+    <div class="card-grid">
+        <a href="{% url 'timers:stopwatch' %}" class="tool-card">
+            <div class="tool-icon">&#9719;</div>
+            <h3>Stopwatch</h3>
+            <p>Track your time, measure your sessions, and monitor your progress.</p>
+            <span class="tool-cta">Start Stopwatch &rarr;</span>
+        </a>
+        <a href="{% url 'timers:countdown' %}" class="tool-card">
+            <div class="tool-icon">&#9684;</div>
+            <h3>Countdown</h3>
+            <p>Set a time limit and stay focused until the timer ends.</p>
+            <span class="tool-cta">Start Countdown &rarr;</span>
+        </a>
+        <a href="{% url 'timers:pomodoro' %}" class="tool-card">
+            <div class="tool-icon">&#10047;</div>
+            <h3>Pomodoro</h3>
+            <p>Work in focused intervals with automatic breaks to maintain your rhythm.</p>
+            <span class="tool-cta">Start Pomodoro &rarr;</span>
+        </a>
+    </div>
+</section>
+
+<section class="section">
+    <p class="section-eyebrow">more than a timer</p>
+    <h2 class="section-title">Everything You Need to Make Progress</h2>
+    <div class="card-grid">
+        <a href="{% url 'timers:tasks' %}" class="tool-card">
+            <div class="tool-icon">&#10003;</div>
+            <h3>Organize Your Day</h3>
+            <p>Manage tasks, track completion, and keep your priorities organized.</p>
+            <span class="tool-cta">Open To-Do &rarr;</span>
+        </a>
+        <a href="{% url 'timers:challenges' %}" class="tool-card">
+            <div class="tool-icon">&#127942;</div>
+            <h3>Build Better Habits</h3>
+            <p>Create personal challenges, track daily consistency, and record progress.</p>
+            <span class="tool-cta">View Challenges &rarr;</span>
+        </a>
+        <a href="{% url 'timers:report' %}" class="tool-card">
+            <div class="tool-icon">&#128202;</div>
+            <h3>Understand Your Progress</h3>
+            <p>Review study time, sessions, activity breakdowns, and trends.</p>
+            <span class="tool-cta">See Report &rarr;</span>
+        </a>
+    </div>
+</section>
+
+<section class="section benefits">
+    <div class="benefit-grid">
+        <div class="benefit">
+            <div class="tool-icon">&#127919;</div>
+            <h3>Focus Better</h3>
+            <p>Spend dedicated time on the tasks that matter most.</p>
+        </div>
+        <div class="benefit">
+            <div class="tool-icon">&#128293;</div>
+            <h3>Stay Consistent</h3>
+            <p>Build routines and follow through on personal challenges.</p>
+        </div>
+        <div class="benefit">
+            <div class="tool-icon">&#128200;</div>
+            <h3>See Your Progress</h3>
+            <p>Understand your activity through meaningful reports.</p>
+        </div>
+    </div>
+</section>
+
+<section class="section about">
+    <p class="section-eyebrow">about this application</p>
+    <h2 class="about-title">A Simpler Way to Work Better</h2>
+    <p class="about-text">
+        Productivity Timer brings time tracking, focused work sessions, task
+        organization, personal challenges, and progress reports together in one
+        place. Spend less time managing your routine and more time making
+        meaningful progress.
+    </p>
+    <a href="{% url 'timers:pomodoro' %}" class="btn btn-primary">Start your first session</a>
+</section>
+{% endblock %}
